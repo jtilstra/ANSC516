@@ -207,3 +207,59 @@ qiime composition da-barplot \
   --i-data ancombc-Sample_time.qza \
   --p-significance-threshold 0.05 \
   --o-visualization da-barplot-Sample_time.qzv
+
+echo "random forest analysis"
+qiime sample-classifier classify-samples \
+  --i-table table.qza \
+  --m-metadata-file Proj_metadata.txt \
+  --m-metadata-column Sample_time \
+  --p-optimize-feature-selection \
+  --p-parameter-tuning \
+  --p-estimator RandomForestClassifier \
+  --p-n-estimators 15 \
+  --p-random-state 200 \
+  --output-dir project-classifier
+
+qiime metadata tabulate \
+  --m-input-file project-classifier/predictions.qza \
+  --o-visualization project-classifier/predictions.qzv
+
+qiime metadata tabulate \
+  --m-input-file project-classifier/probabilities.qza \
+  --o-visualization project-classifier/probabilities.qzv
+
+qiime metadata tabulate \
+  --m-input-file project-classifier/test_targets.qza \
+  --m-input-file project-classifier/predictions.qza \
+  --o-visualization project-classifier/test_targets_predictions.qzv
+
+qiime metadata tabulate \
+  --m-input-file project-classifier/feature_importance.qza \
+  --o-visualization project-classifier/feature_importance.qzv
+
+qiime feature-table filter-features \
+  --i-table table.qza \
+  --m-metadata-file project-classifier/feature_importance.qza \
+  --o-filtered-table project-classifier/important-feature-table.qza
+
+qiime sample-classifier heatmap \
+  --i-table table.qza \
+  --i-importance project-classifier/feature_importance.qza \
+  --m-sample-metadata-file Proj_metadata.txt \
+  --m-sample-metadata-column Sample_time \
+  --p-group-samples \
+  --p-feature-count 30 \
+  --o-filtered-table project-classifier/important-feature-table-top-30.qza \
+  --o-heatmap project-classifier/important-feature-heatmap.qzv
+
+qiime sample-classifier heatmap \
+--i-table table.qza \
+--i-importance project-classifier/feature_importance.qza  \
+--m-sample-metadata-file Proj_metadata.txt  \
+--m-sample-metadata-column Sample_time \
+--m-feature-metadata-file taxonomy.qza \
+--m-feature-metadata-column Taxon \
+--p-group-samples  \
+--p-feature-count 30  \
+--o-filtered-table project-classifier/important-feature-table-taxonomy-top-30.qza \
+--o-heatmap project-classifier/important-feature-heatmap-taxonomy.qzv
