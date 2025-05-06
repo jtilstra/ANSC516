@@ -190,3 +190,20 @@ qiime composition da-barplot \
   --p-significance-threshold 0.05 \
   --o-visualization da-barplot-farm-type.qzv
 
+echo "ANCOM-BC testing during-season sampling"
+qiime feature-table filter-samples \
+  --i-table table.qza \
+  --m-metadata-file Proj_metadata.txt \
+  --p-where "[Farm_type] = 'Mixed.farm'" \
+  --o-filtered-table Sample-Mixed-Farm-table.qza
+
+qiime composition ancombc \
+  --i-table Sample-Mixed-Farm-table.qza \
+  --m-metadata-file Proj_metadata.txt \
+  --p-formula 'Sample_time' \
+  --o-differentials ancombc-Sample_time.qza
+
+qiime composition da-barplot \
+  --i-data ancombc-Sample_time.qza \
+  --p-significance-threshold 0.05 \
+  --o-visualization da-barplot-Sample_time.qzv
